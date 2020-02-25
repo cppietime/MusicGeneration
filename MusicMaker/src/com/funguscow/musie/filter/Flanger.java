@@ -35,5 +35,10 @@ public class Flanger implements Filter {
 		delay.setStride(avg + amp * Math.cos(phase));
 		return output;
 	}
+	
+	public void reset() {
+		delay.reset();
+		phase = 0;
+	}
 
 }

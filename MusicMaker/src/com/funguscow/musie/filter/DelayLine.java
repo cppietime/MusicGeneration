@@ -1,5 +1,7 @@
 package com.funguscow.musie.filter;
 
+import java.util.Arrays;
+
 /**
  * A filter that is just a delay line
  * @author alpac
@@ -26,7 +28,7 @@ public class DelayLine implements Filter{
 	}
 	
 	public double filter(double input) {
-		double output = input + gain * PolesZeroPair.interpolate(buf, ptr - stride);
+		double output = input * (1 - gain) + gain * PolesZeroPair.interpolate(buf, ptr - stride);
 		if(bwd) {
 			buf[ptr++] = output;
 		}else {
@@ -34,6 +36,11 @@ public class DelayLine implements Filter{
 		}
 		ptr %= buf.length;
 		return output;
+	}
+	
+	public void reset() {
+		ptr = 0;
+		Arrays.fill(buf, 0);
 	}
 	
 	public double getGain() {

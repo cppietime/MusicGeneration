@@ -26,6 +26,7 @@ public class Phaser implements Filter {
 		this.amp = amp;
 		this.omega = omega;
 		this.arg = arg;
+		this.magnitude = magnitude;
 		phase = 0;
 		prev = 0;
 		filters = new CascadeFilter[stages];
@@ -35,7 +36,7 @@ public class Phaser implements Filter {
 	}
 	
 	public double filter(double input) {
-		prev = (prev - input) * feedback;
+		prev = input + (prev - input) * feedback;
 		phase = (phase + omega) % (2 * Math.PI);
 		double carg = arg + amp * Math.cos(phase);
 		for(CascadeFilter filter : filters) {
@@ -43,7 +44,14 @@ public class Phaser implements Filter {
 			((PolesZeroPair)filter.getFilter(0)).setArg(carg).calculateCoefs();
 			((PolesZeroPair)filter.getFilter(1)).setArg(carg).calculateCoefs();
 		}
-		return input + (prev - input) * weight;
+		prev = input + (prev - input) * weight;
+		return prev;
+	}
+	
+	public void reset() {
+		phase = prev = 0;
+		for(CascadeFilter filter : filters)
+			filter.reset();
 	}
 
 }

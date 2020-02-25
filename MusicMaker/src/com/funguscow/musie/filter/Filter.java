@@ -5,7 +5,6 @@ package com.funguscow.musie.filter;
  * @author alpac
  *
  */
-@FunctionalInterface
 public interface Filter {
 	
 	/**
@@ -14,5 +13,7 @@ public interface Filter {
 	 * @return Output sample
 	 */
 	public double filter(double input);
+	
+	public void reset();
 
 }

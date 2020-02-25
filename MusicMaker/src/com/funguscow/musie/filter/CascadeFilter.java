@@ -3,12 +3,14 @@ package com.funguscow.musie.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.funguscow.musie.instrument.Effectable;
+
 /**
  * Cascading of individual filters
  * @author alpac
  *
  */
-public class CascadeFilter implements Filter {
+public class CascadeFilter implements Filter, Effectable<Filter> {
 	
 	private List<Filter> filters;
 	
@@ -21,7 +23,7 @@ public class CascadeFilter implements Filter {
 	 * @param f
 	 * @return this
 	 */
-	public CascadeFilter addFilter(Filter f) {
+	public CascadeFilter addEffect(Filter f) {
 		filters.add(f);
 		return this;
 	}
@@ -33,6 +35,11 @@ public class CascadeFilter implements Filter {
 	 */
 	public Filter getFilter(int i) {
 		return filters.get(i);
+	}
+	
+	public void reset() {
+		for (Filter filter : filters)
+			filter.reset();
 	}
 	
 	public double filter(double input) {

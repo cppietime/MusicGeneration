@@ -9,7 +9,7 @@ import java.util.Arrays;
  */
 public class PolesZeroPair implements Filter {
 
-	private double magnitude, arg, buf[], coefs[], stride;
+	private double magnitude, arg, buf[], coefs[], stride, unity;
 	private int ptr;
 	private boolean pole;
 
@@ -25,10 +25,12 @@ public class PolesZeroPair implements Filter {
 		this.arg = arg;
 		this.pole = pole;
 		this.stride = stride;
+		coefs = new double[3];
 		buf = new double[2 * (int)(stride + 1)];
 		Arrays.fill(buf, 0);
 		calculateCoefs();
 		ptr = 0;
+		unity = 1;
 	}
 	
 	/**
@@ -37,24 +39,45 @@ public class PolesZeroPair implements Filter {
 	public void calculateCoefs() {
 		double real = Math.cos(arg) * magnitude;
 		double imag = Math.sin(arg) * magnitude;
+		unity = 1.0 - 2.0 * real + real * real + imag * imag;
+		if(pole)
+			unity = 1/unity;
+//		double realdif = real / magnitude - real;
+//		double imagdif = imag / magnitude + imag;
+//		double arguni = Math.abs(1 - magnitude) * Math.sqrt(realdif * realdif + imagdif * imagdif);
+//		if(pole)
+//			arguni = 1/arguni;
+//		unity = Math.max(unity, arguni);
+//		double nyuni = 1.0 + 2.0 * real + real * real + imag * imag;
+//		if(pole)
+//			nyuni = 1/nyuni;
+//		unity = Math.max(unity, nyuni);
+		unity = 1.0 / unity;
 		coefs[0] = 1.0;
 		coefs[1] = -2 * real;
-		coefs[2] = real * real + imag * imag;
+		coefs[2] = (real * real + imag * imag);
 	}
 
 	public double filter(double input) {
 		double output = 0;
 		if (pole) {
+			input *= unity;
 			output = (input - coefs[1] * interpolate(buf, ptr - stride) - coefs[2] * interpolate(buf, ptr - 2 * stride))
 					/ coefs[0];
 			buf[ptr++] = output;
 		} else {
 			output = coefs[0] * input + coefs[1] * interpolate(buf, ptr - stride)
-					+ coefs[1] * interpolate(buf, ptr - 2 * stride);
+					+ coefs[2] * interpolate(buf, ptr - 2 * stride);
+			output *= unity;
 			buf[ptr++] = input;
 		}
 		ptr %= buf.length;
 		return output;
+	}
+	
+	public void reset() {
+		ptr = 0;
+		Arrays.fill(buf, 0);
 	}
 
 	/**
