@@ -21,30 +21,36 @@ import com.funguscow.musie.instrument.Wavegen;
  */
 public class Randomizer {
 
-	private static void applyMods(Oscillator base, Random random, int depth) {
+	private static final int AMPMOD_ODDS = 3, FREQMOD_ODDS = 3, PHASEMOD_ATTS = 3, PHASEODD_MIN = 2, PHASEODD_RANGE = 4,
+			PHASEPOW_RANGE = 3;
+	private static final double AMPAMP = .2, AMPFREQ_RANGE = 4.5, AMPFREQ_MIN = .05, FREQAMP = .5, FREQFREQ_RANGE = 4.5,
+			FREQFREQ_MIN = .05;
+	
+	private static Random random = new Random();
+
+	private static void applyMods(Oscillator base, int depth) {
 		if (depth > 0) {
-			if (random.nextInt() % 3 == 0) {
-				Oscillator ampmod = randomSine(random, depth - 1);
-				double amp = random.nextDouble() * .2;
-				double freq = 0.5 + random.nextDouble() * 4.5;
+			if (random.nextInt() % AMPMOD_ODDS == 0) {
+				Oscillator ampmod = randomSine(depth - 1);
+				double amp = random.nextDouble() * AMPAMP;
+				double freq = AMPFREQ_MIN + random.nextDouble() * AMPFREQ_RANGE;
 				base.addAmpMod(ampmod, amp, -freq);
 			}
-			if (random.nextInt() % 3 == 0) {
-				Oscillator freqmod = randomSine(random, depth - 1);
-				double amp = random.nextDouble() * .5;
-				double freq = 0.5 + random.nextDouble() * 4.5;
+			if (random.nextInt() % FREQMOD_ODDS == 0) {
+				Oscillator freqmod = randomSine(depth - 1);
+				double amp = random.nextDouble() * FREQAMP;
+				double freq = FREQFREQ_MIN + random.nextDouble() * FREQFREQ_RANGE;
 				base.addFreqMod(freqmod, amp, -freq);
 			}
-			for (int i = 0; i < random.nextInt(3); i++) {
-				Oscillator phasemod = randomSine(random, depth - 1);
-				int odd = 2 + (random.nextInt(4));
-				int twopow = (random.nextInt(3));
+			for (int i = 0; i < random.nextInt(PHASEMOD_ATTS); i++) {
+				Oscillator phasemod = randomSine(depth - 1);
+				int odd = PHASEODD_MIN + (random.nextInt(PHASEODD_RANGE));
+				int twopow = (random.nextInt(PHASEPOW_RANGE));
 				int pow = 1 << twopow;
 				double freq = odd * pow;
 				double amp = Math.PI * 2 / (twopow + 1);
 				if (random.nextBoolean())
 					freq = 1 / freq;
-				System.out.println("Mod w/ freq = " + freq + " amp = " + amp);
 				base.addPhaseMod(phasemod, amp, freq);
 			}
 		}
@@ -56,9 +62,9 @@ public class Randomizer {
 	 * @param depth
 	 * @return A random sinusoidal oscillator
 	 */
-	public static Oscillator randomSine(Random random, int depth) {
+	public static Oscillator randomSine(int depth) {
 		Oscillator sine = new Oscillator(Waveforms.Sine);
-		applyMods(sine, random, depth);
+		applyMods(sine, depth);
 		return sine;
 	}
 
@@ -68,7 +74,7 @@ public class Randomizer {
 	 * @param depth
 	 * @return A random sine-like oscillator
 	 */
-	public static Oscillator randomSinelike(Random random, int depth) {
+	public static Oscillator randomSinelike(int depth) {
 		Oscillator sinelike = null;
 		switch (random.nextInt(3)) {
 		case 0:
@@ -81,16 +87,19 @@ public class Randomizer {
 			sinelike = new Oscillator(Waveforms.Rectsine);
 			break;
 		}
-		applyMods(sinelike, random, depth - 1);
+		applyMods(sinelike, depth - 1);
 		return sinelike;
 	}
+
+	private static final double LOWBUT_DEV = .25;
+	private static final int LOWBUT_MIN = 1, LOWBUTN_RANGE = 3;
 
 	/**
 	 * 
 	 * @param random
 	 * @return A random non-sine wave oscillator
 	 */
-	public static Oscillator randomNonsine(Random random) {
+	public static Oscillator randomNonsine() {
 		Oscillator nonsine = null;
 		switch (random.nextInt(3)) {
 		case 0:
@@ -103,58 +112,71 @@ public class Randomizer {
 			nonsine = new Oscillator(Waveforms.Triangle);
 			break;
 		}
-		nonsine.addEffect(Filters.buttersworth(1 + random.nextInt(3), Math.PI + random.nextGaussian() * .25, false));
+		nonsine.addEffect(Filters.buttersworth(LOWBUT_MIN + random.nextInt(LOWBUTN_RANGE),
+				Math.PI + random.nextGaussian() * LOWBUT_DEV, false));
 		return nonsine;
 	}
+
+	private static final int BUT_ATTS = 3;
 
 	/**
 	 * 
 	 * @param random
 	 * @return A randomly filtered noise generator
 	 */
-	public static Oscillator randomNoise(Random random) {
+	public static Oscillator randomNoise() {
 		Oscillator noise = new Oscillator(Waveforms.Noise);
-		for (int i = 0; i < 1 + random.nextInt(3); i++) {
-			noise.addEffect(Filters.buttersworth(1 + random.nextInt(3), Math.PI + random.nextGaussian() * .25,
-					random.nextBoolean()));
-			;
+		for (int i = 0; i < 1 + random.nextInt(BUT_ATTS); i++) {
+			noise.addEffect(Filters.buttersworth(LOWBUT_MIN + random.nextInt(LOWBUTN_RANGE),
+					Math.PI + random.nextGaussian() * LOWBUT_DEV, random.nextBoolean()));
 		}
 		return noise;
 	}
+
+	private static final int DEPTH0 = 3;
+	private static final double PICLOG_BASE = 3, PICLOG_MUL = 7;
 
 	/**
 	 * 
 	 * @param random
 	 * @return A random wavegen
 	 */
-	public static Wavegen randomWave(Random random) {
+	public static Wavegen randomWave() {
 		int type = random.nextInt(4);
-		System.out.println("Type = " + type);
 		switch (type) {
 		case 0:
-			return randomSine(random, 3);
+			return randomSine(DEPTH0);
 		case 1:
-			return randomSinelike(random, 3);
+			return randomSinelike(DEPTH0);
 		case 2:
-			return randomNonsine(random);
+			return randomNonsine();
 		default:
-			Wavegen src = randomWave(random);
+			Wavegen src = randomWave();
 			if (!(src instanceof Pluck))
-				src = new Pluck(src, 1 - Math.exp(random.nextDouble() * -7 - 3));
+				src = new Pluck(src, 1 - Math.exp(random.nextDouble() * -PICLOG_MUL - PICLOG_BASE));
 			return src;
 		}
 	}
+
+	private static final double ATT_MUL = .1, HOLD_MUL = .2, DEC_MUL = .5, SUS_BASE = .2, SUS_MUL = .78;
 
 	/**
 	 * 
 	 * @param random
 	 * @return Random AHDSR envelope
 	 */
-	public static Envelope randomADSR(Random random) {
-		Envelope envelope = new Envelope(Math.exp(random.nextDouble() * .2) - 1, random.nextDouble() * .25,
-				Math.exp(random.nextDouble() * .5) - 1, .2 + random.nextDouble() * .78, random.nextDouble());
+	public static Envelope randomADSR() {
+		Envelope envelope = new Envelope(Math.exp(random.nextDouble() * ATT_MUL) - 1, random.nextDouble() * HOLD_MUL,
+				Math.exp(random.nextDouble() * DEC_MUL) - 1, SUS_BASE + random.nextDouble() * SUS_MUL,
+				random.nextDouble());
 		return envelope;
 	}
+
+	private static final double STRMUL = 2, STRBASE = 5, DELBASE = 440, DELRAN = 5, FWBASE = .5, FWMUL = .2, FDMUL = 44,
+			FDRAM = 8, FDOMRAN = 3, MAGMIN = .2, MAGRANGE = .8, PHMULS = 6, PHMUL = 2, FEEDMUL = .4, PWMUL = .2,
+			PWBASE = .5, PWARGS = 6, PDOMRAN = 3, DELAY_MUL = 500, DELAY_BASE = 1600, DETUNE_MUL = 900, CHORBASE = 990,
+			CHORMUL = 4, CMUL = 99;
+	private static final int STAGEMIN = 3, STAGERANGE = 4, REVERB_CHANCE = 2, CHORUS_CHANCE = 3;
 
 	/**
 	 * Apply random filter effects to base
@@ -162,26 +184,32 @@ public class Randomizer {
 	 * @param base
 	 * @param random
 	 */
-	public static void randomEffects(Effectable<?> base, Random random) {
+	public static void randomEffects(Effectable<?> base) {
 		switch (random.nextInt(3)) {
 		case 0:
-			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -2 - 5), true,
-					440 * (random.nextDouble() * 5 + 1), random.nextGaussian() * .2 + .5,
-					44 * (1 + random.nextDouble() * 8), 2 * Math.PI / 44100 * (1 + random.nextDouble() * 3)));
+			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), true,
+					DELBASE * (random.nextDouble() * DELRAN + 1), random.nextGaussian() * FWMUL + FWBASE,
+					FDMUL * (1 + random.nextDouble() * FDRAM),
+					2 * Math.PI / 44100 * (1 + random.nextDouble() * FDOMRAN)));
 			break;
 		case 1:
-			base.addEffect(new Phaser(3 + random.nextInt(4), .2 + random.nextDouble() * .8,
-					random.nextGaussian() * Math.PI / 6 + Math.PI / 2, random.nextDouble() * .4,
-					random.nextGaussian() * .2 + .5, random.nextGaussian() * Math.PI / 6,
-					2 * Math.PI / 44100 * (1 + random.nextDouble() * 3)));
+			base.addEffect(new Phaser(STAGEMIN + random.nextInt(STAGERANGE), MAGMIN + random.nextDouble() * MAGRANGE,
+					random.nextGaussian() * Math.PI / PHMULS + Math.PI / PHMUL, random.nextDouble() * FEEDMUL,
+					random.nextGaussian() * PWMUL + PWBASE, random.nextGaussian() * Math.PI / PWARGS,
+					2 * Math.PI / 44100 * (1 + random.nextDouble() * PDOMRAN)));
 		}
-		if (random.nextInt(2) == 0) {
-			base.addEffect(Filters.reverb(random.nextGaussian() * 500 + 1600, random.nextDouble() * 900));
+		if (random.nextInt(REVERB_CHANCE) == 0) {
+			base.addEffect(
+					Filters.reverb(random.nextGaussian() * DELAY_MUL + DELAY_BASE, random.nextDouble() * DETUNE_MUL));
 		}
-		if (random.nextInt(3) == 0) {
-			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -2 - 5), false,
-					990 * (random.nextDouble() * 4 + 1), random.nextGaussian() * .2 + .5,
-					99 * (1 + random.nextDouble() * 8), 2 * Math.PI / 44100 * (1 + random.nextDouble() * 3)));
+		if (random.nextInt(CHORUS_CHANCE) == 0) {
+			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), false,
+					CHORBASE * (random.nextDouble() * CHORMUL + 1), random.nextGaussian() * FWMUL + FWBASE,
+					CMUL * (1 + random.nextDouble() * FDMUL), 2 * Math.PI / 44100 * (1 + random.nextDouble() * FDRAM)));
+		}
+		for (int i = 0; i < random.nextInt(BUT_ATTS); i++) {
+			base.addEffect(Filters.buttersworth(LOWBUT_MIN + random.nextInt(LOWBUTN_RANGE),
+					Math.PI + random.nextGaussian() * LOWBUT_DEV, random.nextBoolean()));
 		}
 	}
 
@@ -190,25 +218,27 @@ public class Randomizer {
 	 * @param random
 	 * @return A randomized instrument
 	 */
-	public static Instrument randomInstrument(Random random) {
-		Wavegen wave = randomWave(random);
+	public static Instrument randomInstrument() {
+		Wavegen wave = randomWave();
 		Instrument instrument = new Instrument(wave);
-		instrument.setEnvelope(randomADSR(random));
-		randomEffects(instrument, random);
+		instrument.setEnvelope(randomADSR());
+		randomEffects(instrument);
 		return instrument;
 	}
+	
+	private static final double DRUM_ATT = .08, DRUM_DEC = .08, DRUM_SUS = .005, DRUM_REL = .1;
 
 	/**
 	 * 
 	 * @param random
 	 * @return A randomized drum instrument
 	 */
-	public static Instrument randomDrums(Random random) {
-		Wavegen wave = randomNoise(random);
-		Envelope envelope = new Envelope(random.nextDouble() * .08, 0, random.nextDouble() * .08,
-				random.nextDouble() * .005, random.nextDouble() * .1);
+	public static Instrument randomDrums() {
+		Wavegen wave = randomNoise();
+		Envelope envelope = new Envelope(random.nextDouble() * DRUM_ATT, 0, random.nextDouble() * DRUM_DEC,
+				random.nextDouble() * DRUM_SUS, random.nextDouble() * DRUM_REL);
 		Instrument drum = new Instrument(wave).setEnvelope(envelope);
-		randomEffects(drum, random);
+		randomEffects(drum);
 		return drum;
 	}
 

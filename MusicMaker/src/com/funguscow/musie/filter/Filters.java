@@ -35,13 +35,15 @@ public class Filters {
 	 * @return
 	 */
 	public static CascadeFilter Allpass(double mag, double angle, int stride) {
-		System.out.println("Magnitude = " + mag);
 		if (mag < 1)
 			mag = 1.0 / mag;
 		Filter zeros = Zero(mag, angle, stride);
 		Filter poles = Pole(1.0 / mag, angle, stride);
 		return new CascadeFilter().addEffect(zeros).addEffect(poles);
 	}
+
+	private static final double ALLPASS_MAG = .9, ARG0 = Math.PI / 3, ARG1 = Math.PI * 2 / 3;
+	private static final int STR0 = 10, STR1 = 7;
 
 	/**
 	 * 
@@ -53,14 +55,15 @@ public class Filters {
 		combs.addFilter(new DelayLine(0, false, 1), .25).addFilter(new DelayLine(.75, true, delay), .25)
 				.addFilter(new DelayLine(.75, true, delay + detune), .25)
 				.addFilter(new DelayLine(.75, true, delay - detune), .25);
-		reverb.addEffect(combs).addEffect(Allpass(.9, Math.PI / 3, 10)).addEffect(Allpass(.9, Math.PI * 2 / 3, 7));
+		reverb.addEffect(combs).addEffect(Allpass(ALLPASS_MAG, ARG0, STR0)).addEffect(Allpass(ALLPASS_MAG, ARG1, STR1));
 		return reverb;
 	}
-	
+
 	/**
 	 * Produce a butterworth filter w/ even poles
-	 * @param n Half the # poles
-	 * @param cutoff Cutoff angular frequency
+	 * 
+	 * @param n        Half the # poles
+	 * @param cutoff   Cutoff angular frequency
 	 * @param highpass true for highpass filter
 	 * @return
 	 */
@@ -68,10 +71,9 @@ public class Filters {
 		CascadeFilter butter = new CascadeFilter();
 		n *= 2;
 		double incr = Math.PI / (n + 1);
-		for(int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			double angle = Math.PI / 2 + incr * (i + 1);
-			double sreal = cutoff * Math.cos(angle),
-					simag = cutoff * Math.sin(angle);
+			double sreal = cutoff * Math.cos(angle), simag = cutoff * Math.sin(angle);
 			double zmag = Math.exp(sreal);
 			PolesZeroPair pole = new PolesZeroPair(zmag, simag, highpass, 1);
 			butter.addEffect(pole);

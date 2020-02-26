@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Random;
 
 import javax.sound.sampled.AudioFormat;
 
@@ -61,7 +60,7 @@ public class Wave {
 	public static void main(String[] args) {
 		AudioFormat format = new AudioFormat(44100, 8, 1, false, false);
 		double samples[] = new double[44100 * 2];
-		Instrument guitar = Randomizer.randomInstrument(new Random());
+		Instrument guitar = Randomizer.randomInstrument();
 		guitar.playNote(samples, 440, 0.5, 1.5, 0, 44100);
 		double max = 0;
 		for(double d : samples) {
