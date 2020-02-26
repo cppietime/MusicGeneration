@@ -32,9 +32,9 @@ public class Bar extends Module {
 		for (int i = 0; i < measures.length; i++) {
 			measures[i] = new ArrayList<Note>();
 			do {
-				Note next = new Note(gen[i].nadicFraction(motif.getTimeSig().numerator, 0.66), this.chord, gen[i]);
+				Note next = new Note(gen[i].nadicFraction(motif.getTimeSig().numerator, 0.5), this.chord, gen[i]);
 				measures[i].add(next);
-			} while (gen[i].nextInt(3) != 0);
+			} while (gen[i].nextInt(5) != 0);
 			measures[i].sort(Note::compareTo);
 		}
 	}
@@ -65,7 +65,7 @@ public class Bar extends Module {
 					temp.add(note);
 			}
 			while (gen[i].nextInt(3) != 0) {
-				Note next = new Note(gen[i].nadicFraction(motif.getTimeSig().numerator, 0.66), this.chord, gen[i]);
+				Note next = new Note(gen[i].nadicFraction(motif.getTimeSig().numerator, 0.5), this.chord, gen[i]);
 				temp.add(next);
 			}
 			measure.clear();

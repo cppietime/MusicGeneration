@@ -18,10 +18,7 @@ public class Note implements Comparable<Note>{
 	 */
 	public Note(Fraction start, int chord, Attractor gen) {
 		this.start = start;
-		length = start.clone();
-		length.numerator = 1;
-		while (gen.nextInt(10) != 0)
-			length.incrementNadic(2);
+		length = gen.nadicFraction(start.denominator, .2);
 		octave = (int) (gen.nextGaussian() * 1.5);
 		note = chord + 2 * gen.nextInt(3);
 		while (gen.nextInt(2) == 0)
@@ -29,8 +26,13 @@ public class Note implements Comparable<Note>{
 		note %= 7;
 	}
 	
+	/**
+	 * 
+	 * @return This note a single note number
+	 */
 	public int getNote() {
-		return note + octave * 7;
+		int interval = note * 2 - note / 3 + note / 6;
+		return interval + octave * 12;
 	}
 	
 	public Fraction getStart() {

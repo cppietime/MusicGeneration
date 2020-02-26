@@ -88,12 +88,19 @@ public class Attractor extends Random {
 	 * @return A geometrically distributed random n-adic fraction
 	 */
 	public Fraction nadicFraction(int n, double lambda) {
-		Fraction nadic = new Fraction(0, 1);
 		double raw = rawDouble();
+		int depth = 0;
 		while(raw % 1 <= lambda) {
-			nadic.incrementNadic(n);
+//			nadic.incrementNadic(n);
 			raw = rawDouble();
+			depth ++;
 		}
+		int denom = (int)Math.pow(n, depth);
+		System.out.println("Denom = " + denom);
+		Fraction nadic = new Fraction(1, denom);
+		int incrs = nextInt(denom);
+		for(int i = 0; i < incrs; i ++)
+			nadic.incrementNadic(n);
 		return nadic;
 	}
 	
