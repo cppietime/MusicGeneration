@@ -54,7 +54,7 @@ public class Filters {
 		ParallelFilter combs = new ParallelFilter();
 		combs.addFilter(new DelayLine(0, false, 1), .25).addFilter(new DelayLine(.75, true, delay), .25)
 				.addFilter(new DelayLine(.75, true, delay + detune), .25)
-				.addFilter(new DelayLine(.75, true, delay - detune), .25);
+				.addFilter(new DelayLine(.75, true, Math.max(1, delay - detune)), .25);
 		reverb.addEffect(combs).addEffect(Allpass(ALLPASS_MAG, ARG0, STR0)).addEffect(Allpass(ALLPASS_MAG, ARG1, STR1));
 		return reverb;
 	}
@@ -75,7 +75,7 @@ public class Filters {
 			double angle = Math.PI / 2 + incr * (i + 1);
 			double sreal = cutoff * Math.cos(angle), simag = cutoff * Math.sin(angle);
 			double zmag = Math.exp(sreal);
-			PolesZeroPair pole = new PolesZeroPair(zmag, simag, highpass, 1);
+			PolesZeroPair pole = new PolesZeroPair(zmag, simag, !highpass, 1);
 			butter.addEffect(pole);
 		}
 		return butter;

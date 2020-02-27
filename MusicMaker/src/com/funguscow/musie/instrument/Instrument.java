@@ -53,6 +53,7 @@ public class Instrument implements Effectable<Instrument> {
 				break;
 			double sample = generator.generate(frequency, sampleRate);
 			sample = effect.filter(sample) * amplitude;
+//			sample *= amplitude;
 			if (envelope != null)
 				sample *= envelope.gainFactor(time, duration);
 			track[frame] += sample;

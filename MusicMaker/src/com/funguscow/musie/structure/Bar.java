@@ -84,9 +84,9 @@ public class Bar extends Module {
 		allNotes.sort(Note::compareTo);
 		int active = 0;
 		for (Note note : allNotes) {
-			Fraction time = note.getStart();
+			double time = note.getStart();
 			for (Note playing : activeNotes) {
-				if (playing.getStart().add(playing.getLength()).compareTo(time) <= 0)
+				if (playing.getStart() + playing.getLength() <= time)
 					deadNotes.add(playing);
 			}
 			for (Note dead : deadNotes) {
@@ -111,12 +111,12 @@ public class Bar extends Module {
 		for (int i = 0; i < measures.length; i++) {
 			List<Note> measure = measures[i];
 			for (Note note : measure) {
-				Fraction time = note.getStart();
+				double time = note.getStart();
 				for (Note playing : activeNotes) {
-					if (playing.getStart().add(playing.getLength()).compareTo(time) <= 0) {
+					if (playing.getStart() + playing.getLength() <= time) {
 						deadNotes.add(playing);
 						NoteMessage off = new NoteMessage(i, playing.getNote(), false,
-								playing.getStart().add(playing.getLength()).add(start));
+								playing.getStart() + playing.getLength() + start.asReal(), 0);
 						msgs.add(off);
 					}
 				}
@@ -125,14 +125,15 @@ public class Bar extends Module {
 				}
 				if (!activeNotes.contains(note)) {
 					activeNotes.add(note);
-					NoteMessage on = new NoteMessage(i, note.getNote(), true, note.getStart().add(start));
+					NoteMessage on = new NoteMessage(i, note.getNote(), true, note.getStart() + start.asReal(),
+							note.getLength());
 					msgs.add(on);
 				}
 				deadNotes.clear();
 			}
-			for(Note playing : activeNotes) {
+			for (Note playing : activeNotes) {
 				NoteMessage off = new NoteMessage(i, playing.getNote(), false,
-						playing.getStart().add(playing.getLength()).add(start));
+						playing.getStart() + playing.getLength()+ start.asReal(), 0);
 				msgs.add(off);
 			}
 			activeNotes.clear();

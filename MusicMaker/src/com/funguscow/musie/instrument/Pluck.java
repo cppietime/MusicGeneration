@@ -17,7 +17,7 @@ public class Pluck implements Wavegen {
 	public Pluck(Wavegen generator, double decay) {
 		this.generator = generator;
 		this.decay = decay;
-		ring_buffer = new double[4096];
+		ring_buffer = new double[8192];
 	}
 	
 	/**

@@ -13,6 +13,9 @@ public class Fraction implements Comparable<Fraction>, Cloneable{
 		long gcd = reduce ? GCD(numerator, denominator) : 1;
 		this.numerator = (int)(numerator / gcd);
 		this.denominator = (int)(denominator / gcd);
+		if(numerator < 0 || denominator < 0) {
+			throw new RuntimeException("Negative fraction? " + this);
+		}
 	}
 	
 	public Fraction(long numerator, long denominator) {
@@ -67,7 +70,25 @@ public class Fraction implements Comparable<Fraction>, Cloneable{
 	 * @return
 	 */
 	public Fraction add(Fraction other) {
-		int num = numerator * other.denominator + other.numerator * denominator;
+		if(other.asReal() < 0) {
+			throw new RuntimeException("Other  negative " + other);
+		}
+		if(asReal() < 0) {
+			throw new RuntimeException("I'm negative " + this);
+		}
+		long gcd = GCD(denominator, other.denominator);
+		long num = numerator * other.denominator / gcd + other.numerator * denominator / gcd;
+		long den = denominator * other.denominator / gcd;
+		return new Fraction(num, den);
+	}
+	
+	/**
+	 * Subtract other from this
+	 * @param other
+	 * @return The new fraction with the result
+	 */
+	public Fraction sub(Fraction other) {
+		int num = numerator * other.denominator - other.numerator * denominator;
 		int den = denominator * other.denominator;
 		return new Fraction(num, den);
 	}

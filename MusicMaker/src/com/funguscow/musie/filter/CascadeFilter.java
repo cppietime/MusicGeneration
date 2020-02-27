@@ -37,6 +37,15 @@ public class CascadeFilter implements Filter, Effectable<Filter> {
 		return filters.get(i);
 	}
 	
+	/**
+	 * Delete all filters
+	 * @return this
+	 */
+	public CascadeFilter clear() {
+		filters.clear();
+		return this;
+	}
+	
 	public void reset() {
 		for (Filter filter : filters)
 			filter.reset();

@@ -9,6 +9,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.sound.midi.MidiSystem;
+import javax.sound.sampled.AudioFormat;
+
+import com.funguscow.musie.wave.Wave;
 
 /**
  * A bar or group of bars
@@ -34,12 +37,12 @@ public class Segment extends Module {
 			timeSig.denominator <<= random.nextInt(2);
 			timeSig.numerator = 2 + 2 * random.nextInt(1 + timeSig.denominator / 2);
 		}
-		int length = 2 * (1 + random.nextInt(3));
+		int length = 2 * (1 + random.nextInt(2));
 		int max = 3 + random.nextInt(6);
-		int depth = 5 - random.nextInt(length - 1);
+		int depth = Math.max(1, 3 - length) + random.nextInt(1);
 		System.out.println("Length = " + length + " Depth = " + depth);
 		Motif motif = new Motif(length, max, timeSig, random);
-		int channels = 2 + random.nextInt(3);
+		int channels = 2 + random.nextInt(2);
 		Attractor gens[] = new Attractor[channels];
 		for(int i = 0; i < gens.length; i++) {
 			gens[i] = new Attractor(random);
@@ -138,6 +141,11 @@ public class Segment extends Module {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("Starting sample rendering");
+		double[] samps = seq.render(44100, .5, .5);
+		System.out.println("Starting file writing");
+		Wave.write(new File("test.wav"), samps, new AudioFormat(44100, 16, 1, true, false));
+		System.out.println("Done");
 	}
 
 }

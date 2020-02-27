@@ -57,9 +57,9 @@ public class DelayLine implements Filter{
 	}
 	
 	public DelayLine setStride(double stride) {
-		this.stride = stride;
-		if(buf.length != (int)(stride + 1)) {
-			double nbuf[] = new double[(int)(stride + 1)];
+		this.stride = Math.max(1, stride);
+		if(buf.length != (int)(this.stride + 1)) {
+			double nbuf[] = new double[(int)(this.stride + 1)];
 			System.arraycopy(buf, 0, nbuf, 0, Math.min(buf.length, nbuf.length));
 			buf = nbuf;
 			ptr %= buf.length;

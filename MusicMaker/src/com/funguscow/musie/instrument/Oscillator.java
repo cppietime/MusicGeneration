@@ -135,6 +135,7 @@ public class Oscillator implements Wavegen, Effectable<Oscillator>{
 			ampUse += mod.gain * mod.osc.generate(mod.getFreq(freqUse), sampleRate);
 		}
 		phase += 2 * Math.PI * frequency / sampleRate;
+		ampUse = effect.filter(ampUse);
 		return ampUse;
 	}
 	

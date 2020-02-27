@@ -23,7 +23,7 @@ public class Randomizer {
 
 	private static final int AMPMOD_ODDS = 3, FREQMOD_ODDS = 3, PHASEMOD_ATTS = 3, PHASEODD_MIN = 2, PHASEODD_RANGE = 4,
 			PHASEPOW_RANGE = 3;
-	private static final double AMPAMP = .2, AMPFREQ_RANGE = 4.5, AMPFREQ_MIN = .05, FREQAMP = .5, FREQFREQ_RANGE = 4.5,
+	private static final double AMPAMP = .12, AMPFREQ_RANGE = 4.5, AMPFREQ_MIN = .05, FREQAMP = .12, FREQFREQ_RANGE = 4.5,
 			FREQFREQ_MIN = .05;
 	
 	private static Random random = new Random();
@@ -48,7 +48,7 @@ public class Randomizer {
 				int twopow = (random.nextInt(PHASEPOW_RANGE));
 				int pow = 1 << twopow;
 				double freq = odd * pow;
-				double amp = Math.PI * 2 / (twopow + 1);
+				double amp = .1 * random.nextDouble();
 				if (random.nextBoolean())
 					freq = 1 / freq;
 				base.addPhaseMod(phasemod, amp, freq);
@@ -76,7 +76,9 @@ public class Randomizer {
 	 */
 	public static Oscillator randomSinelike(int depth) {
 		Oscillator sinelike = null;
-		switch (random.nextInt(3)) {
+		int type = random.nextInt(3);
+		System.out.println("Nonsine type " + type);
+		switch (type) {
 		case 0:
 			sinelike = new Oscillator(Waveforms.Halfsine);
 			break;
@@ -133,7 +135,7 @@ public class Randomizer {
 		return noise;
 	}
 
-	private static final int DEPTH0 = 3;
+	private static final int DEPTH0 = 2;
 	private static final double PICLOG_BASE = 3, PICLOG_MUL = 7;
 
 	/**
@@ -142,13 +144,16 @@ public class Randomizer {
 	 * @return A random wavegen
 	 */
 	public static Wavegen randomWave() {
-		int type = random.nextInt(4);
+		int type = random.nextInt(3); //TODO back to 5
+		System.out.println("Wave type " + type);
 		switch (type) {
 		case 0:
-			return randomSine(DEPTH0);
 		case 1:
+			return randomSine(DEPTH0);
+		case -1:
 			return randomSinelike(DEPTH0);
 		case 2:
+		case 3:
 			return randomNonsine();
 		default:
 			Wavegen src = randomWave();
@@ -174,7 +179,7 @@ public class Randomizer {
 
 	private static final double STRMUL = 2, STRBASE = 5, DELBASE = 440, DELRAN = 5, FWBASE = .5, FWMUL = .2, FDMUL = 44,
 			FDRAM = 8, FDOMRAN = 3, MAGMIN = .2, MAGRANGE = .8, PHMULS = 6, PHMUL = 2, FEEDMUL = .4, PWMUL = .2,
-			PWBASE = .5, PWARGS = 6, PDOMRAN = 3, DELAY_MUL = 500, DELAY_BASE = 1600, DETUNE_MUL = 900, CHORBASE = 990,
+			PWBASE = .5, PWARGS = 6, PDOMRAN = 3, DELAY_MUL = 200, DELAY_BASE = 1000, DETUNE_MUL = 900, CHORBASE = 990,
 			CHORMUL = 4, CMUL = 99;
 	private static final int STAGEMIN = 3, STAGERANGE = 4, REVERB_CHANCE = 2, CHORUS_CHANCE = 3;
 
@@ -202,11 +207,11 @@ public class Randomizer {
 			base.addEffect(
 					Filters.reverb(random.nextGaussian() * DELAY_MUL + DELAY_BASE, random.nextDouble() * DETUNE_MUL));
 		}
-		if (random.nextInt(CHORUS_CHANCE) == 0) {
-			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), false,
-					CHORBASE * (random.nextDouble() * CHORMUL + 1), random.nextGaussian() * FWMUL + FWBASE,
-					CMUL * (1 + random.nextDouble() * FDMUL), 2 * Math.PI / 44100 * (1 + random.nextDouble() * FDRAM)));
-		}
+//		if (random.nextInt(CHORUS_CHANCE) == 0) {
+//			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), false,
+//					CHORBASE * (random.nextDouble() * CHORMUL + 1), random.nextGaussian() * FWMUL + FWBASE,
+//					CMUL * (1 + random.nextDouble() * FDMUL), 2 * Math.PI / 44100 * (1 + random.nextDouble() * FDRAM)));
+//		}
 		for (int i = 0; i < random.nextInt(BUT_ATTS); i++) {
 			base.addEffect(Filters.buttersworth(LOWBUT_MIN + random.nextInt(LOWBUTN_RANGE),
 					Math.PI + random.nextGaussian() * LOWBUT_DEV, random.nextBoolean()));
@@ -226,7 +231,7 @@ public class Randomizer {
 		return instrument;
 	}
 	
-	private static final double DRUM_ATT = .08, DRUM_DEC = .08, DRUM_SUS = .005, DRUM_REL = .1;
+	private static final double DRUM_ATT = .02, DRUM_DEC = .05, DRUM_SUS = .005, DRUM_REL = .1;
 
 	/**
 	 * 
@@ -239,6 +244,7 @@ public class Randomizer {
 				random.nextDouble() * DRUM_SUS, random.nextDouble() * DRUM_REL);
 		Instrument drum = new Instrument(wave).setEnvelope(envelope);
 		randomEffects(drum);
+		drum.addEffect(Filters.buttersworth(2, Math.PI / 2, false));
 		return drum;
 	}
 
