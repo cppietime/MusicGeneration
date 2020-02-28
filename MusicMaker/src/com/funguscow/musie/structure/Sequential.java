@@ -28,7 +28,7 @@ import com.funguscow.musie.random.Randomizer;
 public class Sequential {
 
 	private static final int DEFAULT_PPQ = 128 * 3;
-	private static final double DEFAULT_BPM = 180;
+	private static final double DEFAULT_BPM = 120;
 
 	private List<NoteMessage> msgs;
 	private double bpm;
@@ -70,6 +70,10 @@ public class Sequential {
 		}
 	}
 	
+	public double beatsToSecs(double beats) {
+		return beats * timeSig.asReal() * 60 / bpm;
+	}
+	
 	/**
 	 * Get the total number of samples for this sequence
 	 * @param sampleRate Samples per second
@@ -79,7 +83,7 @@ public class Sequential {
 	public int samples(int sampleRate, double padding) {
 		msgs.sort(NoteMessage::compareTo);
 		double last = msgs.get(msgs.size() - 1).time;
-		double secs = last * timeSig.asReal() * 4 * 60 / bpm;
+		double secs = beatsToSecs(last);
 		System.out.println(secs + " seconds long");
 		return (int)((padding + secs) * sampleRate);
 	}
@@ -97,8 +101,8 @@ public class Sequential {
 		for(NoteMessage msg : msgs) {
 			if(!msg.on || msg.channel != num || msg.duration == 0)
 				continue;
-			double startTime = timeSig.asReal() * msg.time * 4 * 60 / bpm;
-			double duration = msg.duration * timeSig.asReal() * 4 * 60 / bpm;
+			double startTime = beatsToSecs(msg.time);
+			double duration = beatsToSecs(msg.duration);
 			double frequency = 8.176 * Math.pow(2, msg.note / 12.0);
 			instrument.playNote(track, frequency, 1.0, duration, startTime, sampleRate);
 		}
@@ -146,8 +150,9 @@ public class Sequential {
 			effect.clear();
 			Randomizer.randomEffects(effect);
 			renderTrack(work, instr, sampleRate, i, effect);
+			double nmul = i > 0 ? 1 : .5;
 			for(int j = 0; j < samps; j++) {
-				sound[j + sampsTotal - samps] += work[j];
+				sound[j + sampsTotal - samps] += work[j] * nmul;
 			}
 			System.out.println("Rendered track " + i);
 		}

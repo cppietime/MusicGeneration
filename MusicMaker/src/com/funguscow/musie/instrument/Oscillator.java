@@ -121,7 +121,8 @@ public class Oscillator implements Wavegen, Effectable<Oscillator>{
 	public double generate(double frequency, int sampleRate) {
 		double freqUse = frequency;
 		for(Modulator mod : freq_mod) {
-			freqUse *= 1.0 + mod.gain * mod.osc.generate(mod.getFreq(frequency), sampleRate);
+//			freqUse *= 1.0 + mod.gain * mod.osc.generate(mod.getFreq(frequency), sampleRate);
+			freqUse *= Math.pow(2, mod.gain * mod.osc.generate(mod.getFreq(frequency), sampleRate) / 12);
 		}
 		double phaseUse = phase;
 		for(Modulator mod : phase_mod) {

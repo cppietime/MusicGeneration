@@ -37,10 +37,10 @@ public class Segment extends Module {
 			timeSig.denominator <<= random.nextInt(2);
 			timeSig.numerator = 2 + 2 * random.nextInt(1 + timeSig.denominator / 2);
 		}
-		int length = 2 * (1 + random.nextInt(2));
-		int max = 3 + random.nextInt(6);
-		int depth = Math.max(1, 3 - length) + random.nextInt(1);
-		System.out.println("Length = " + length + " Depth = " + depth);
+		int length = 4 + random.nextInt(4);
+		int max = length * (length - 1);
+		int depth = 2;
+		System.out.println("Length = " + length + " Depth = " + depth + " Max = " + max);
 		Motif motif = new Motif(length, max, timeSig, random);
 		int channels = 2 + random.nextInt(2);
 		Attractor gens[] = new Attractor[channels];
@@ -54,6 +54,7 @@ public class Segment extends Module {
 	
 	public Segment(int depth, Motif motif, Attractor[] gen) {
 		super(depth, motif, gen);
+		System.out.println("Geneating at depth " + depth);
 		children = new ArrayList<Module>();
 		order = new int[motif.getLength()];
 		counts = new TreeMap<Integer, Integer>();
@@ -131,8 +132,10 @@ public class Segment extends Module {
 		}
 		for(NoteMessage msg : msgs) {
 			msg.note -= minNote;
+			msg.note %= 82 - 30;
+			msg.note += 30;
 		}
-		msgs = msgs.stream().filter(n -> n.note >= 0 && n.note < 128).collect(Collectors.toList());
+		msgs = msgs.stream().filter(n -> n.note >= 30 && n.note <= 82).collect(Collectors.toList());
 		msgs.sort(NoteMessage::compareTo);
 		System.out.println(msgs.size() + " note messages");
 		Sequential seq = new Sequential(msgs, song.motif.getTimeSig());

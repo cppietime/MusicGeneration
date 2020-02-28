@@ -71,7 +71,7 @@ public class Filters {
 		CascadeFilter butter = new CascadeFilter();
 		n *= 2;
 		double incr = Math.PI / (n + 1);
-		for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n/2; i++) {
 			double angle = Math.PI / 2 + incr * (i + 1);
 			double sreal = cutoff * Math.cos(angle), simag = cutoff * Math.sin(angle);
 			double zmag = Math.exp(sreal);

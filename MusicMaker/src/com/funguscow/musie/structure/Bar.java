@@ -34,7 +34,7 @@ public class Bar extends Module {
 			do {
 				Note next = new Note(gen[i].nadicFraction(motif.getTimeSig().numerator, 0.5), this.chord, gen[i]);
 				measures[i].add(next);
-			} while (gen[i].nextInt(5) != 0);
+			} while (gen[i].nextInt(2) != 0);
 			measures[i].sort(Note::compareTo);
 		}
 	}
