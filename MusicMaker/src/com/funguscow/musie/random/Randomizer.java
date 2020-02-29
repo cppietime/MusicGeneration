@@ -23,9 +23,9 @@ public class Randomizer {
 
 	private static final int AMPMOD_ODDS = 3, FREQMOD_ODDS = 3, PHASEMOD_ATTS = 4, PHASEODD_MIN = 2, PHASEODD_RANGE = 4,
 			PHASEPOW_RANGE = 3;
-	private static final double AMPAMP = .05, AMPFREQ_RANGE = 4.5, AMPFREQ_MIN = .05, FREQAMP = .05, FREQFREQ_RANGE = 4.5,
-			FREQFREQ_MIN = .05;
-	
+	private static final double AMPAMP = .05, AMPFREQ_RANGE = 4.5, AMPFREQ_MIN = .05, FREQAMP = .05,
+			FREQFREQ_RANGE = 4.5, FREQFREQ_MIN = .05;
+
 	private static Random random = new Random();
 
 	private static void applyMods(Oscillator base, int depth) {
@@ -140,8 +140,8 @@ public class Randomizer {
 	private static final int DEPTH0 = 2;
 	private static final double PICLOG_BASE = 3, PICLOG_MUL = 7;
 
-	private static boolean plucky = true;
-	
+	private static boolean plucky = false;
+
 	/**
 	 * 
 	 * @param random
@@ -185,9 +185,11 @@ public class Randomizer {
 
 	private static final double STRMUL = 2, STRBASE = 5, DELBASE = 440, DELRAN = 5, FWBASE = .5, FWMUL = .2, FDMUL = 44,
 			FDRAM = 8, FDOMRAN = 3, MAGMIN = .2, MAGRANGE = .8, PHMULS = 6, PHMUL = 2, FEEDMUL = .4, PWMUL = .2,
-			PWBASE = .5, PWARGS = 6, PDOMRAN = 3, DELAY_MUL = 200, DELAY_BASE = 1000, DETUNE_MUL = 900, CHORBASE = 800,
-			CHORMUL = 2, CMUL = 99;
-	private static final int STAGEMIN = 3, STAGERANGE = 4, REVERB_CHANCE = 2, CHORUS_CHANCE = 3;
+			PWBASE = .5, PWARGS = 6, PDOMRAN = 3, DELAY_MUL = 200, DELAY_BASE = 1000, DETUNE_MUL = 900, FORM_MIN = .3,
+			FORM_MAX = .98;
+	private static final double FORMANTS[] = { 240, 2400, 235, 2100, 390, 2300, 370, 1900, 585, 1710, 850, 1610, 820,
+			1530, 750, 940, 700, 760, 600, 1170, 500, 700, 460, 1310, 360, 640, 300, 1390, 250, 595 };
+	private static final int STAGEMIN = 3, STAGERANGE = 4, REVERB_CHANCE = 2, FORMANT_CHANCE = 3;
 
 	/**
 	 * Apply random filter effects to base
@@ -198,7 +200,6 @@ public class Randomizer {
 	public static void randomEffects(Effectable<?> base) {
 		switch (random.nextInt(3)) {
 		case 0:
-			System.out.println("FLANGER");
 			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), true,
 					DELBASE * (random.nextDouble() * DELRAN + 1), random.nextGaussian() * FWMUL + FWBASE,
 					FDMUL * (1 + random.nextDouble() * FDRAM),
@@ -211,19 +212,17 @@ public class Randomizer {
 					2 * Math.PI / 44100 * (1 + random.nextDouble() * PDOMRAN)));
 		}
 		if (random.nextInt(REVERB_CHANCE) == 0) {
-			System.out.println("REVERB");
 			base.addEffect(
 					Filters.reverb(random.nextGaussian() * DELAY_MUL + DELAY_BASE, random.nextDouble() * DETUNE_MUL));
 		}
-//		if (random.nextInt(CHORUS_CHANCE) == 0) {
-//			System.out.println("CHORUS");
-//			base.addEffect(new Flanger(1 - Math.exp(random.nextDouble() * -STRMUL - STRBASE), false,
-//					CHORBASE * (random.nextDouble() * CHORMUL + 1), random.nextGaussian() * FWMUL + FWBASE,
-//					CMUL * (1 + random.nextDouble() * FDMUL), 2 * Math.PI / 44100 * (1 + random.nextDouble() * FDRAM)));
-//		}
 		for (int i = 0; i < random.nextInt(BUT_ATTS); i++) {
 			base.addEffect(Filters.buttersworth(LOWBUT_MIN + random.nextInt(LOWBUTN_RANGE),
 					Math.PI + random.nextGaussian() * LOWBUT_DEV, random.nextBoolean()));
+		}
+		if (random.nextInt(FORMANT_CHANCE) == 0) {
+			int index = random.nextInt(FORMANTS.length / 2);
+			base.addEffect(Filters.formant(random.nextDouble() * (FORM_MAX - FORM_MIN) + FORM_MIN, FORMANTS[index * 2],
+					FORMANTS[index * 2 + 1]));
 		}
 	}
 
@@ -239,8 +238,8 @@ public class Randomizer {
 		randomEffects(instrument);
 		return instrument;
 	}
-	
-	private static final double DRUM_ATT = .02, DRUM_DEC = .05, DRUM_SUS = .005, DRUM_REL = .1;
+
+	private static final double DRUM_ATT = .02, DRUM_DEC = .175, DRUM_SUS = .005, DRUM_REL = .1, PLUCK_ODDS = 0;
 
 	/**
 	 * 
@@ -249,11 +248,13 @@ public class Randomizer {
 	 */
 	public static Instrument randomDrums() {
 		Wavegen wave = randomNoise();
+		if (random.nextDouble() <= PLUCK_ODDS)
+			wave = new Pluck(wave, .98);
 		Envelope envelope = new Envelope(random.nextDouble() * DRUM_ATT, 0, random.nextDouble() * DRUM_DEC,
-				random.nextDouble() * DRUM_SUS, random.nextDouble() * DRUM_REL);
+				random.nextDouble() * (wave instanceof Pluck ? .5 : DRUM_SUS), random.nextDouble() * DRUM_REL);
 		Instrument drum = new Instrument(wave).setEnvelope(envelope);
 		randomEffects(drum);
-		drum.addEffect(Filters.buttersworth(2, Math.PI / 2, false));
+		drum.addEffect(Filters.buttersworth(3, Math.PI / 4, false));
 		return drum;
 	}
 

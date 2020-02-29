@@ -52,9 +52,9 @@ public class Filters {
 	public static CascadeFilter reverb(double delay, double detune) {
 		CascadeFilter reverb = new CascadeFilter();
 		ParallelFilter combs = new ParallelFilter();
-		combs.addFilter(new DelayLine(0, false, 1), .25).addFilter(new DelayLine(.75, true, delay), .25)
-				.addFilter(new DelayLine(.75, true, delay + detune), .25)
-				.addFilter(new DelayLine(.75, true, Math.max(1, delay - detune)), .25);
+		combs.addFilter(new DelayLine(0, false, 1), .25).addFilter(new DelayLine(.75, false, delay), .25)
+				.addFilter(new DelayLine(.75, false, delay + detune), .25)
+				.addFilter(new DelayLine(.75, false, Math.max(1, delay - detune)), .25);
 		reverb.addEffect(combs).addEffect(Allpass(ALLPASS_MAG, ARG0, STR0)).addEffect(Allpass(ALLPASS_MAG, ARG1, STR1));
 		return reverb;
 	}
@@ -71,7 +71,7 @@ public class Filters {
 		CascadeFilter butter = new CascadeFilter();
 		n *= 2;
 		double incr = Math.PI / (n + 1);
-		for (int i = 0; i < n/2; i++) {
+		for (int i = 0; i < n / 2; i++) {
 			double angle = Math.PI / 2 + incr * (i + 1);
 			double sreal = cutoff * Math.cos(angle), simag = cutoff * Math.sin(angle);
 			double zmag = Math.exp(sreal);
@@ -79,6 +79,20 @@ public class Filters {
 			butter.addEffect(pole);
 		}
 		return butter;
+	}
+
+	/**
+	 * Make a simple 2-frequency formant filter
+	 * 
+	 * @param mag
+	 * @param f1
+	 * @param f2
+	 * @return
+	 */
+	public static CascadeFilter formant(double mag, double f1, double f2) {
+		CascadeFilter formant = new CascadeFilter();
+		formant.addEffect(Pole(mag, f1, 1)).addEffect(Pole(mag, f2, 1));
+		return formant;
 	}
 
 }
