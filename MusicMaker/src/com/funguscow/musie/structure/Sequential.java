@@ -84,7 +84,6 @@ public class Sequential {
 		msgs.sort(NoteMessage::compareTo);
 		double last = msgs.get(msgs.size() - 1).time;
 		double secs = beatsToSecs(last);
-		System.out.println(secs + " seconds long");
 		return (int)((padding + secs) * sampleRate);
 	}
 	
@@ -134,7 +133,6 @@ public class Sequential {
 	public double[] render(int sampleRate, double pad0, double pad1) {
 		int sampsTotal = samples(sampleRate, pad0 + pad1);
 		int samps = samples(sampleRate, pad1);
-		System.out.println("Requires " + (samps + sampsTotal) + " samples");
 		double work[] = new double[samps];
 		double sound[] = new double[sampsTotal];
 		int maxInstr = 0;
@@ -142,7 +140,6 @@ public class Sequential {
 			if(msg.channel > maxInstr)
 				maxInstr = msg.channel;
 		}
-		System.out.println("Found " + maxInstr + " instruments");
 		CascadeFilter effect = new CascadeFilter();
 		for(int i = 0; i <= maxInstr; i++) {
 			Arrays.fill(work, 0);
@@ -154,7 +151,6 @@ public class Sequential {
 			for(int j = 0; j < samps; j++) {
 				sound[j + sampsTotal - samps] += work[j] * nmul;
 			}
-			System.out.println("Rendered track " + i);
 		}
 		double maxval = 0;
 		for(double d : sound) {

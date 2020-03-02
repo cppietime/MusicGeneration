@@ -31,11 +31,9 @@ public class Motif {
 				values[i] = num;
 				correspond.put(sel, num);
 			}
-			System.out.println("Bar " + i + ": " + values[i]);
 			chords[i] = random.nextInt(6);
 		}
 		this.maximum = correspond.size();
-		System.out.println(this.maximum + " unique nums");
 	}
 
 	public int getLength() {

@@ -77,7 +77,6 @@ public class Randomizer {
 	public static Oscillator randomSinelike(int depth) {
 		Oscillator sinelike = null;
 		int type = random.nextInt(3);
-		System.out.println("Nonsine type " + type);
 		switch (type) {
 		case 0:
 			sinelike = new Oscillator(Waveforms.Halfsine);
@@ -104,7 +103,6 @@ public class Randomizer {
 	public static Oscillator randomNonsine() {
 		Oscillator nonsine = null;
 		int nstype = random.nextInt(3);
-		System.out.println("Nonsine type " + nstype);
 		switch (nstype) {
 		case 0:
 			nonsine = new Oscillator(Waveforms.Sawtooth);
@@ -149,7 +147,6 @@ public class Randomizer {
 	 */
 	public static Wavegen randomWave() {
 		int type = random.nextInt(plucky ? 3 : 5);
-		System.out.println("Wave type " + type);
 		switch (type) {
 		case 0:
 		case 1:

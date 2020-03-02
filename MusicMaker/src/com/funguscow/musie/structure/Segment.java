@@ -1,6 +1,9 @@
 package com.funguscow.musie.structure;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -8,7 +11,6 @@ import java.util.Random;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import javax.sound.midi.MidiSystem;
 import javax.sound.sampled.AudioFormat;
 
 import com.funguscow.musie.wave.Wave;
@@ -38,11 +40,9 @@ public class Segment extends Module {
 			timeSig.denominator <<= random.nextInt(2);
 			timeSig.numerator = 2 + 2 * random.nextInt(1 + timeSig.denominator / 2);
 		}
-		System.out.println("Time signature: " + timeSig);
 		int length = 4 + random.nextInt(4);
 		int max = length + 2;
 		int depth = 2;
-		System.out.println("Length = " + length + " Depth = " + depth + " Max = " + max);
 		Motif motif = new Motif(length, max, timeSig, random);
 		int channels = 2 + random.nextInt(3);
 		Attractor gens[] = new Attractor[channels];
@@ -56,7 +56,6 @@ public class Segment extends Module {
 
 	public Segment(int depth, Motif motif, Attractor[] gen) {
 		super(depth, motif, gen);
-		System.out.println("Geneating at depth " + depth);
 		children = new ArrayList<Module>();
 		order = new int[motif.getLength()];
 		counts = new TreeMap<Integer, Integer>();
@@ -125,9 +124,14 @@ public class Segment extends Module {
 	private static final int MAX_NOTES = 12 * 3;
 	private static final int MIN_NOTE = 30;
 
-	public static void main(String[] args) {
+	/**
+	 * Generate a random song an save it to the specified output stream
+	 * Saves in 16-bit signed LE, mono, 44.1 kHz
+	 * @param stream Stream to save to as a RIFF WAVE
+	 * @throws IOException
+	 */
+	public static void makeWave(OutputStream stream) throws IOException{
 		Segment song = song(new Random());
-		System.out.println("Maxnotes: " + song.getMaxNotes());
 		List<NoteMessage> msgs = new ArrayList<NoteMessage>();
 		song.render(msgs, 0);
 		int minNote = msgs.get(0).note;
@@ -143,18 +147,20 @@ public class Segment extends Module {
 		msgs = msgs.stream().filter(n -> n.note >= MIN_NOTE && n.note <= MIN_NOTE + MAX_NOTES)
 				.collect(Collectors.toList());
 		msgs.sort(NoteMessage::compareTo);
-		System.out.println(msgs.size() + " note messages");
 		Sequential seq = new Sequential(msgs, song.motif.getTimeSig());
+		double[] samps = seq.render(44100, .5, .5);
+		Wave.write(stream, samps, new AudioFormat(44100, 16, 1, true, false));
+	}
+	
+	public static void main(String[] args) {
+		File out = new File("test.wav");
 		try {
-			MidiSystem.write(seq.toMidi(), 0, new File("test.mid"));
-		} catch (Exception e) {
+			OutputStream stream = new FileOutputStream(out);
+			makeWave(stream);
+			stream.close();
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Starting sample rendering");
-		double[] samps = seq.render(44100, .5, .5);
-		System.out.println("Starting file writing");
-		Wave.write(new File("test.wav"), samps, new AudioFormat(44100, 16, 1, true, false));
-		System.out.println("Done");
 	}
 
 }
