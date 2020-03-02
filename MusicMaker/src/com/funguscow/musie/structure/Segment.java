@@ -1,7 +1,5 @@
 package com.funguscow.musie.structure;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -152,15 +150,15 @@ public class Segment extends Module {
 		Wave.write(stream, samps, new AudioFormat(44100, 16, 1, true, false));
 	}
 	
-	public static void main(String[] args) {
-		File out = new File("test.wav");
-		try {
-			OutputStream stream = new FileOutputStream(out);
-			makeWave(stream);
-			stream.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		File out = new File("test.wav");
+//		try {
+//			OutputStream stream = new FileOutputStream(out);
+//			makeWave(stream);
+//			stream.close();
+//		} catch(Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
 
 }
