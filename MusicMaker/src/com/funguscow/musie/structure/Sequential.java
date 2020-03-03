@@ -232,7 +232,7 @@ public class Sequential {
 					boolean on = smsg.getCommand() == ShortMessage.NOTE_ON;
 					int note = smsg.getData1();
 					int channel = programs[smsg.getChannel()];
-					long denom = ret.timeSig.numerator * ret.ppq * 2;
+					long denom = ret.timeSig.numerator * ret.ppq * 4;
 					NoteMessage nmsg = new NoteMessage(channel, note, on, (double)time / denom, 0);
 					ret.msgs.add(nmsg);
 				}

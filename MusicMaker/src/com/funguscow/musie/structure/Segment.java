@@ -123,12 +123,10 @@ public class Segment extends Module {
 	private static final int MIN_NOTE = 30;
 
 	/**
-	 * Generate a random song an save it to the specified output stream
-	 * Saves in 16-bit signed LE, mono, 44.1 kHz
-	 * @param stream Stream to save to as a RIFF WAVE
-	 * @throws IOException
+	 * Generate a random song and return the sequence
+	 * @return A Sequential object
 	 */
-	public static void makeWave(OutputStream stream) throws IOException{
+	public static Sequential makeMsgs() {
 		Segment song = song(new Random());
 		List<NoteMessage> msgs = new ArrayList<NoteMessage>();
 		song.render(msgs, 0);
@@ -146,19 +144,18 @@ public class Segment extends Module {
 				.collect(Collectors.toList());
 		msgs.sort(NoteMessage::compareTo);
 		Sequential seq = new Sequential(msgs, song.motif.getTimeSig());
+		return seq;
+	}
+	
+	/**
+	 * Save seq to stream in 16-bit signed LE, mono, 44.1 kHz
+	 * @param seq
+	 * @param stream
+	 * @throws IOException
+	 */
+	public static void makeWave(Sequential seq, OutputStream stream) throws IOException {
 		double[] samps = seq.render(44100, .5, .5);
 		Wave.write(stream, samps, new AudioFormat(44100, 16, 1, true, false));
 	}
-	
-//	public static void main(String[] args) {
-//		File out = new File("test.wav");
-//		try {
-//			OutputStream stream = new FileOutputStream(out);
-//			makeWave(stream);
-//			stream.close();
-//		} catch(Exception e) {
-//			e.printStackTrace();
-//		}
-//	}
 
 }
