@@ -59,7 +59,9 @@ public class Segment extends Module {
 		counts = new TreeMap<Integer, Integer>();
 		for (int i = 0; i < motif.getLength(); i++) {
 			order[i] = motif.getValue(i);
-			counts.put(order[i], 1 + counts.getOrDefault(order[i], 0));
+			if(!counts.containsKey(order[i]))
+				counts.put(order[i], 0);
+			counts.put(order[i], 1 + counts.get(order[i]));
 		}
 		for (int i = 0; i < motif.getMaximum(); i++) {
 			if (depth == 0)
@@ -86,7 +88,7 @@ public class Segment extends Module {
 				continue;
 			int index = order.length - 1 - order.length * ptr.numerator / ptr.denominator;
 			int modId = order[index];
-			if (counts.getOrDefault(modId, 0) > 1) {
+			if (counts.containsKey(modId) && counts.get(modId) > 1) {
 				counts.put(modId, counts.get(modId) - 1);
 				children.add(children.get(modId).clone());
 				modId = children.size() - 1;
